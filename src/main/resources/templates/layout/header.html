@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head lang="en">
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
+        <link href="http://cdn.jsdelivr.net/webjars/bootstrap/3.4.0/css/bootstrap.min.css"
+              th:href="@{/webjars/bootstrap/3.4.0/css/bootstrap.min.css}"
+              rel="stylesheet" media="screen"/>
+        <link rel="stylesheet" th:href="@{/css/style.css}" href="../../static/css/style.css"/>
+    </head>
+    <body>
+
+        <div class="container">
+            <div th:fragment="header">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <a class="navbar-brand" href="#" th:href="@{/}">Home</a>
+                            <ul class="nav navbar-nav">
+                                <li>
+                                    <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                        <input hidden type="submit" value="Sign Out"/>
+                                    </form>
+                                    <a href="javascript: document.logoutForm.submit()"> Logout</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="jumbotron">
+                    <div class="row text-center">
+                        <div class="row">
+                            <h2>Welcome : <span th:text="${username}"></span></h2>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <img src="../../static/images/spring-by-pivotal.png" width="30%"
+                             th:src="@{/images/spring-by-pivotal.png}"/>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </body>
+</html>
