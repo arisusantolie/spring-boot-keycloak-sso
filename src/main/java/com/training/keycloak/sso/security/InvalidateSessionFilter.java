@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -50,9 +51,10 @@ public class InvalidateSessionFilter extends OncePerRequestFilter {
                             oauthToken.getName());
 
             String accessToken = client.getAccessToken().getTokenValue();
+            OidcUser oidcUser=(OidcUser) authentication.getPrincipal();
 
 //            System.out.println(accessToken);
-            String sessionValidationUrl = "http://localhost:8080/realms/training/protocol/openid-connect/userinfo";
+            String sessionValidationUrl = oidcUser.getIssuer()+"/protocol/openid-connect/userinfo";
 
             HttpHeaders headers = new HttpHeaders();
 //            System.out.println("oidcUser.getUserInfo().toString() = "+oidcUser.getUserInfo().toString().toString());
