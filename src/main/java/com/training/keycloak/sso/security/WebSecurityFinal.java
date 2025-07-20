@@ -45,7 +45,6 @@ public class WebSecurityFinal {
     @Bean
     public SecurityFilterChain clientFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/customer").hasRole("android")
                 .anyRequest()
                 .authenticated());
         http.oauth2Login(x->{

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
+    <title>TOTP Management</title>
+    <link href="http://cdn.jsdelivr.net/webjars/bootstrap/5.3.7/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/5.3.7/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../../static/css/style.css"/>
+    <style>
+        .qr-code-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code-container img {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .secret-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header Navigation -->
+    <div th:fragment="header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="#" th:href="@{/}">Home</a>
+                    <a class="nav-link active" href="#" th:href="@{/totp/}">TOTP Management</a>
+                </div>
+                <div class="navbar-nav ms-auto">
+                    <form name="logoutForm" th:action="@{/logout}" method="post" class="d-none">
+                        <input hidden type="submit" value="Sign Out"/>
+                    </form>
+                    <a class="nav-link" href="javascript: document.logoutForm.submit()">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h2>TOTP Management for: <span class="text-primary" th:text="${username}">User</span></h2>
+            <p class="text-muted">User ID: <span th:text="${userId}">user-id</span></p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Generate/Delete TOTP Secret Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card" th:classappend="${hasTotpSetup} ? 'border-warning' : ''">
+                <div class="card-header" th:classappend="${hasTotpSetup} ? 'bg-warning text-dark' : ''">
+                    <h4 th:if="${!hasTotpSetup}">🔐 Generate TOTP Secret</h4>
+                    <h4 th:if="${hasTotpSetup}">⚠️ TOTP Already Configured</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Show generate option if no TOTP setup -->
+                    <div th:if="${!hasTotpSetup}">
+                        <p>Generate a new TOTP secret and QR code for setting up your authenticator app.</p>
+                        <form th:action="@{/totp/generate}" method="post">
+                            <button type="submit" class="btn btn-primary">Generate New Secret</button>
+                        </form>
+                    </div>
+
+                    <!-- Show current setup info and delete option if TOTP exists -->
+                    <div th:if="${hasTotpSetup}">
+                        <p>You already have a TOTP device configured with the name <strong>"MyDevice"</strong>.</p>
+                        <p class="text-muted">You can remove the current TOTP setup to generate a new one, or continue using your existing authenticator.</p>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                🗑️ Remove TOTP Setup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOTP Setup Section (shown after generating secret) -->
+    <div th:if="${showSetup}" class="row mt-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4>📱 Setup Your Authenticator</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>QR Code</h5>
+                            <p>Scan this QR code with your authenticator app:</p>
+                            <div class="qr-code-container">
+                                <img th:src="'data:image/png;base64,' + ${secret.qrCode}"
+                                     alt="TOTP QR Code" class="img-fluid"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Manual Entry</h5>
+                            <p>Or enter this secret manually:</p>
+                            <div class="secret-display">
+                                <strong th:text="${secret.encodedSecret}">SECRET_KEY</strong>
+                            </div>
+                            <small class="text-muted">Copy this secret to your authenticator app if you can't scan the QR code.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register TOTP Section -->
+    <div th:if="${showSetup}" class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>📝 Register TOTP Device</h4>
+                </div>
+                <div class="card-body">
+                    <p>After setting up your authenticator app, register it by providing the current code.</p>
+                    <form th:action="@{/totp/register}" method="post">
+                        <div class="mb-3">
+                            <label for="encodedSecret" class="form-label">Secret Key</label>
+                            <input type="text" class="form-control" id="encodedSecret" name="encodedSecret"
+                                   th:value="${secret?.encodedSecret}" placeholder="Enter the generated secret" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="initialCode" class="form-label">Current TOTP Code</label>
+                            <input type="text" class="form-control" id="initialCode" name="initialCode"
+                                   placeholder="Enter 6-digit code from your app" maxlength="6" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Register Device</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">⚠️ Confirm TOTP Removal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Are you sure you want to remove your TOTP setup?</strong></p>
+                    <p>This will:</p>
+                    <ul>
+                        <li>Remove the device "MyDevice" from your account</li>
+                        <li>Disable TOTP authentication for your account</li>
+                        <li>Require you to set up TOTP again if needed</li>
+                    </ul>
+                    <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form th:action="@{/totp/delete}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Yes, Remove TOTP</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
