@@ -44,18 +44,18 @@ public class WebSecurityFinal {
     @Order(1)
     @Bean
     public SecurityFilterChain clientFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/customer").hasRole("android")
+        http.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/customer").hasRole("android")
                 .anyRequest()
-                .authenticated();
+                .authenticated());
         http.oauth2Login(x->{
                     x.userInfoEndpoint(userInfo -> userInfo
                             .oidcUserService(this.oidcUserService()));
                 });
 
-        http.logout()
+        http.logout(logout -> logout
                 .addLogoutHandler(keycloakLogoutHandler)
-                .logoutSuccessUrl("/");
+                .logoutSuccessUrl("/"));
 
         return http.build();
     }

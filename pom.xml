@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.16</version>
+		<version>3.5.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.training</groupId>
@@ -14,8 +14,17 @@
 	<name>keycloak.sso</name>
 	<description>Demo project for Spring Boot with keycloak SSO</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>21</java.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.thymeleaf.extras</groupId>
+				<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+				<version>3.0.5.RELEASE</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -50,7 +59,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
 
 		<dependency>

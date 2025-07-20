@@ -13,10 +13,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -72,7 +72,7 @@ public class InvalidateSessionFilter extends OncePerRequestFilter {
 //            e.printStackTrace();
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 // If the session is no longer valid, you can log the user out or take other appropriate actions.
-                request.getSession().invalidate();
+                request.logout();
                 // Redirect to a logout success page or other appropriate action
                 response.sendRedirect("/");
             } else {
