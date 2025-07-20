@@ -92,3 +92,7 @@ bash ./mvnw spring-boot:run -Dspring-boot.run.profiles=app2
 - **Application 1**: http://localhost:9090
 - **Application 2**: http://localhost:9091
 - **H2 Database Console**: http://localhost:9090/h2-console (or 9091 for app2)
+
+Additional : 
+For TOTP 2FA keycloak tutorial, can visit in my personal blog at :https://arisusantolie.com/blog/enable-two-factor-authentication-2fa-in-keycloak-using-totp-and-rest-api-qr-code/
+
